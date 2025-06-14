@@ -10,7 +10,7 @@ This is a freelance-ready Python Flask app that scrapes product data from Amazon
 - 📄 Get results in JSON or downloadable CSV
 - 🖥️ Web UI to enter search terms and view table
 - 🌐 API endpoint for backend integrations
-- ✅ Deployable on Render / Railway / EC2
+
 
 ---
 
