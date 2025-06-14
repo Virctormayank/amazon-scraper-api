@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Amazon Product Scraper</title>
+    <style>
+        body {
+            background-color: lightyellow;
+            font-family: Arial;
+            margin: 40px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 90%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+        }
+        h2 {
+           text-align: center;
+        }
+        form {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h2>🛒 Amazon Product Scraper</h2>
+    <form method="GET" action="/scrape">
+          <input type="text" name="query" placeholder="Enter the product" required>
+        <label>Pages: <input type="number" name="pages" value="1" min="1" max="5" required></label>
+        <button type="submit">Scrape</button>
+    </form>
+
+    {% if results %}
+        <h3>Scraped Results:</h3>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Price (₹)</th>
+                <th>Rating</th>
+            </tr>
+            {% for product in results %}
+                <tr>
+                    <td>{{ product["Name"] }}</td>
+                    <td>{{ product["Price (₹)"] }}</td>
+                    <td>{{ product["Rating"] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>
