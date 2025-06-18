@@ -4,6 +4,7 @@ from scraper import scrape_amazon_products
 import csv, io
 from flask_cors import CORS
 from fpdf import FPDF
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -11,6 +12,7 @@ CORS(app)
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
@@ -49,6 +51,15 @@ def download_pdf():
     output.seek(0)
     return Response(output, mimetype='application/pdf',
                     headers={'Content-Disposition': 'attachment; filename=products.pdf'})
+    
+@app.route('/health')
+def health():
+    return "OK", 200
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template("index.html", error="Something went wrong. Please try again."), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
