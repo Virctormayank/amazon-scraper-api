@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Amazon Product Scraper</title>
+  <style>
+    body {
+      background-color: lightyellow;
+      font-family: Arial;
+      margin: 40px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    input, button, select {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: left;
+    }
+    h1, form {
+      text-align: center;
+    }
+    img {
+      max-width: 100px;
+    }
+    .spinner {
+      display: none;
+      text-align: center;
+    }
+  </style>
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
+    }
+
+    function copyLink(link) {
+      navigator.clipboard.writeText(link).then(() => alert("Link copied!"));
+    }
+
+    function download(format) {
+      const rows = [...document.querySelectorAll("tbody tr")].map(row => {
+        const cells = row.querySelectorAll("td");
+        return {
+          title: cells[0].innerText,
+          price: cells[1].innerText,
+          rating: cells[2].innerText,
+          link: cells[3].querySelector('a').href,
+          image: cells[4].querySelector('img').src
+        };
+      });
+
+      fetch(`/download/${format}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: rows })
+      })
+        .then(res => res.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `products.${format}`;
+          a.click();
+        });
+    }
+  </script>
+</head>
+<body>
+  <h1>🛒 Amazon Product Scraper</h1>
+  <div style="text-align:center;">
+    <form method="GET" action="/scrape">
+      <input type="text" name="query" placeholder="Enter the product" required>
+      <label>Pages: <input type="number" name="pages" value="1" min="1" max="5" required></label>
+      <button type="submit">Scrape</button>
+    </form>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  </div>
+
+  {% if error %}
+    <h3 style="color:red; text-align:center;">{{ error }}</h3>
+  {% endif %}
+
+  {% if results %}
+    <div style="text-align:center;">
+      <button onclick="download('csv')">Download CSV</button>
+      <button onclick="download('pdf')">Download PDF</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Price (₹)</th>
+          <th>Rating</th>
+          <th>Link</th>
+          <th>Image</th>
+          <th>Copy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in results %}
+        <tr>
+          <td>{{ product.title }}</td>
+          <td>{{ product.price }}</td>
+          <td>{{ product.rating }}</td>
+          <td><a href="{{ product.link }}" target="_blank">View</a></td>
+          <td><img src="{{ product.image }}" alt="Product Image"></td>
+          <td><button onclick="copyLink('{{ product.link }}')">Copy Link</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</body>
+</html>
